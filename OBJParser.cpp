@@ -1,12 +1,6 @@
-﻿// OBJParser.cpp : Defines the entry point for the application.
-//
-
-#include "OBJParser.h"
-
-using namespace std;
+﻿#include "OBJParser.h"
 
 int main()
 {
-	cout << "Hello CMake." << endl;
 	return 0;
 }
