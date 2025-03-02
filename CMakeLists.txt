@@ -11,8 +11,16 @@ endif()
 
 project ("OBJParser")
 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.65 REQUIRED COMPONENTS system filesystem)
+
+
 # Add source to this project's executable.
 add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
+target_link_libraries(OBJParser Boost::system Boost::filesystem)
+
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
