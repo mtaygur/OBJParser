@@ -5,6 +5,7 @@
 #include <regex>
 
 
+
 std::vector<int> getVertexIdsFromLine(std::string& line)
 {
 	std::vector<int> vertexIds{};
@@ -86,6 +87,27 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 	return {};
 }
 
+void extractLineSegmentsOfVertexPairs(const std::vector<Face>& facesList)
+{
+	std::unordered_set<LineSegmentOfVertexIndexPair, LineSegmentOfVertexIndexPair::Hash> lineSegmentOfVertexIndexPairSet{};
+	/*for (const auto& face : facesList)
+	{
+		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
+		{
+			LineSegmentOfVertexIndexPair lineSegmentOfVertexIndexPair(face.vertexIndices.at(i - 1),
+																	  face.vertexIndices.at(i));
+			lineSegmentOfVertexIndexPairSet.insert(
+				lineSegmentOfVertexIndexPair);
+		}
+		if (face.vertexIndices.size() >= 2)
+		{
+			LineSegmentOfVertexIndexPair  lineSegmentOfVertexIndexPair(face.vertexIndices.back(),
+																	   face.vertexIndices.front());
+			lineSegmentOfVertexIndexPairSet.insert(
+				lineSegmentOfVertexIndexPair);
+		}
+	}*/
+}
 
 int main(int argc, char* argv[])
 {
