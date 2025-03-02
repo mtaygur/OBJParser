@@ -5,6 +5,88 @@
 #include <regex>
 
 
+std::vector<int> getVertexIdsFromLine(std::string& line)
+{
+	std::vector<int> vertexIds{};
+	auto words_list_extract = [](std::string& line,
+								 std::regex pattern) -> std::vector<std::string> {
+		// Iterator to find all matches
+		std::vector<std::string> words_list;
+		auto words_begin = std::sregex_iterator(line.begin(), line.end(), pattern);
+		auto words_end = std::sregex_iterator();
+		for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+		{
+			std::smatch match = *i;
+			words_list.push_back(match.str());
+		}
+		return words_list;
+	};
+
+	//line = "f  435/789/324  765/25/213  987/9789/213  5675/24234/2413";
+	std::regex pattern = std::regex(" -?\\d+/-?\\d+/-?\\d+");
+	if (std::regex_search(line, pattern))
+	{
+		auto words_list = words_list_extract(line, pattern);
+		for (auto& word : words_list)
+		{
+			size_t first_slash_idx = word.find_first_of("/");
+			word = word.substr(0, first_slash_idx);
+			int vertexId = std::stoi(word);
+			vertexIds.push_back(vertexId);
+		}
+		return vertexIds;
+	}
+
+	//line = "f  435//324  765//213 ";
+	pattern = std::regex(" -?\\d+//-?\\d+");
+	if (std::regex_search(line, pattern))
+	{
+		auto words_list = words_list_extract(line, pattern);
+		for (auto& word : words_list)
+		{
+			size_t first_slash_idx = word.find_first_of("/");
+			word = word.substr(0, first_slash_idx);
+			int vertexId = std::stoi(word);
+			vertexIds.push_back(vertexId);
+		}
+		return vertexIds;
+	}
+
+
+	//line = "f  435/324  765/213  987/213";
+	pattern = std::regex(" -?\\d+/-?\\d+");
+	if (std::regex_search(line, pattern))
+	{
+		auto words_list = words_list_extract(line, pattern);
+		for (auto& word : words_list)
+		{
+			size_t first_slash_idx = word.find_first_of("/");
+			word = word.substr(0, first_slash_idx);
+			int vertexId = std::stoi(word);
+			vertexIds.push_back(vertexId);
+		}
+		return vertexIds;
+	}
+
+	//line = "f  -324  213  213";
+	pattern = std::regex(" -?\\d+");
+	if (std::regex_search(line, pattern))
+	{
+		auto words_list = words_list_extract(line, pattern);
+		for (auto& word : words_list)
+		{
+			int vertexId = std::stoi(word);
+			vertexIds.push_back(vertexId);
+		}
+		return vertexIds;
+	}
+
+	//should not reach here	
+	std::cerr << "Invalid face format: " << line << std::endl;
+	return {};
+}
+
+
 int main(int argc, char* argv[])
 {
 
@@ -35,6 +117,10 @@ int main(int argc, char* argv[])
 		'\n'
 	);
 
+	// Return to the beginning of the file to start reading from the beginning
+	file.clear();
+	file.seekg(0);
+
 	std::vector<Vertex> vertexList{ };
 	vertexList.reserve(newline_count / 2);
 	vertexList.push_back(Vertex{});
@@ -44,6 +130,11 @@ int main(int argc, char* argv[])
 	std::vector<TextureCoordinate> textureCoordinateList{  };
 	textureCoordinateList.reserve(newline_count / 2);
 	textureCoordinateList.push_back(TextureCoordinate{});
+
+	std::vector<Face> facesList{};
+	facesList.reserve(newline_count / 2);
+	facesList.push_back(Face{});
+
 
 	std::string line;
 	while (getline(file, line))
@@ -73,8 +164,7 @@ int main(int argc, char* argv[])
 
 		else if (prefix == "f")
 		{
-
-
+			facesList.push_back(Face{ getVertexIdsFromLine(line) });
 		}
 	}
 

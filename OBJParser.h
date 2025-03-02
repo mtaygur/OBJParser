@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include <vector>
 
 struct Vertex
 {
@@ -22,3 +22,7 @@ struct TextureCoordinate
 	double w{ 0.0 };
 };
 
+struct Face
+{
+	std::vector<int> vertexIndices{};
+};
