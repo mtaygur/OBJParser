@@ -14,12 +14,14 @@ project ("OBJParser")
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.65 REQUIRED COMPONENTS system filesystem)
-
+find_package(Boost 1.65)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 # Add source to this project's executable.
 add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
-target_link_libraries(OBJParser Boost::system Boost::filesystem)
+#target_link_libraries(OBJParser Boost)
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
