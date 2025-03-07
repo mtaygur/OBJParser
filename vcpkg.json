@@ -1,5 +1,5 @@
 {
   "dependencies": [
-    "boost"
+    "boost-functional","boost-filesystem"
   ]
 }
