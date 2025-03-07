@@ -1,4 +1,5 @@
 ﻿#include "OBJParser.h"
+#include <boost/filesystem.hpp>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -118,8 +119,11 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	std::string filename = argv[1];
-	std::filesystem::path filepath = filename;
-	if (!std::filesystem::exists(filepath))
+
+	//std::filesystem::path filepath = filename;
+	//if (!std::filesystem::exists(filepath))
+	boost::filesystem::path filepath = filename;
+	if (!boost::filesystem::exists(filepath))
 	{
 		std::cout << "File not found: " << filename << std::endl;
 		return 1;
@@ -129,7 +133,7 @@ int main(int argc, char* argv[])
 	if (!file.is_open())
 	{
 		std::cerr << "Unable to open file: " << filename << std::endl;
-		return false;
+		return 1;
 	}
 
 	// Count the number of newlines to get an estimate how many vertex/face elements we would have
