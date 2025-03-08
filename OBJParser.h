@@ -33,20 +33,22 @@ struct Face
 };
 
 
-class LineSegmentOfVertexIndexPair
+class LineSegment
 {
 	public:
-	LineSegmentOfVertexIndexPair(int first, int second)
+	LineSegment(int firstVertexIndex, int secondVertexIndex, const std::unordered_set<int>& linkedFaceIndices)
 	{
-		if (first == second)
+		if (firstVertexIndex == secondVertexIndex)
 		{
 			throw std::invalid_argument(
 				"First and second vertex indices must be different");
 		}
-		this->data.insert(first);
-		this->data.insert(second);
+		this->data.insert(firstVertexIndex);
+		this->data.insert(secondVertexIndex);
+		this->linkedFaceIndices.insert(linkedFaceIndices.begin(), linkedFaceIndices.end());
 	}
-	LineSegmentOfVertexIndexPair(std::pair<int, int> pair)
+
+	LineSegment(std::pair<int, int> pair, const std::unordered_set<int>& linkedFaceIndices)
 	{
 		if (pair.first == pair.second)
 		{
@@ -55,65 +57,49 @@ class LineSegmentOfVertexIndexPair
 		}
 		this->data.insert(pair.first);
 		this->data.insert(pair.second);
+		this->linkedFaceIndices.insert(linkedFaceIndices.begin(), linkedFaceIndices.end());
 	}
 
-	bool operator==(const LineSegmentOfVertexIndexPair& other) const
+	LineSegment()
 	{
-		return data == other.data;
+	}
+
+	bool operator==(const LineSegment& other) const
+	{
+		return (data == other.data);
 	}
 
 
 	std::pair<int, int> getPair() const
 	{
-		return std::make_pair(first(), second());
+		return std::make_pair(firstVertexIndex(), secondVertexIndex());
+	}
+
+	std::unordered_set<int> getLinkedFaceIndices() const
+	{
+		return linkedFaceIndices;
+	}
+
+	void addNewFaceIndex(int faceIndex)
+	{
+		linkedFaceIndices.insert(faceIndex);
 	}
 
 	struct Hash
 	{
-		std::size_t operator()(const LineSegmentOfVertexIndexPair
-							   & lineSegmentOfVertexIndexPair) const
+		std::size_t operator()(const LineSegment
+							   & lineSegment) const
 		{
 			boost::hash<std::pair<int, int>> hasher;
-			return hasher(lineSegmentOfVertexIndexPair.getPair());
-
-			return std::hash<int>()(lineSegmentOfVertexIndexPair.first()) ^
-				std::hash<int>()(lineSegmentOfVertexIndexPair.second());
+			return hasher(lineSegment.getPair());
 		}
 	};
 
 
 	private:
-	int first() const { return *data.begin(); }
-	int second() const { return *std::next(data.begin()); }
+	int firstVertexIndex() const { return *data.begin(); }
+	int secondVertexIndex() const { return *std::next(data.begin()); }
 	std::set<int> data;
+	std::unordered_set<int> linkedFaceIndices{};
 };
 
-class LineSegmentOfVertexIndexPairSet
-{
-	/*
-	public:
-	void
-		insert(const LineSegmentOfVertexIndexPair& lineSegmentOfVertexIndexPair)
-	{
-
-
-		data.insert(lineSegmentOfVertexIndexPair);
-	}
-	*/
-
-	/*bool contains(
-		LineSegmentOfVertexIndexPair lineSegmentOfVertexIndexPair) const
-	{
-		bool isStraightPairPresent = data.find(lineSegmentOfVertexIndexPair) != data.end();
-		bool isReversedPairPresent = data.find(*lineSegmentOfVertexIndexPair.swapIndices()) != data.end();
-		return isStraightPairPresent || isReversedPairPresent;
-	}*/
-	//std::size_t size() const { return data.size(); }
-	//void clear() { data.clear(); }
-
-
-	//private:
-	//std::unordered_set<LineSegmentOfVertexIndexPair> data;
-
-
-};

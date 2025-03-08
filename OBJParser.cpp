@@ -1,6 +1,5 @@
 ﻿#include "OBJParser.h"
 #include <boost/filesystem.hpp>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -88,26 +87,36 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 	return {};
 }
 
-void extractLineSegmentsOfVertexPairs(const std::vector<Face>& facesList)
+std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
 {
-	std::unordered_set<LineSegmentOfVertexIndexPair, LineSegmentOfVertexIndexPair::Hash> lineSegmentOfVertexIndexPairSet{};
-	/*for (const auto& face : facesList)
+	std::unordered_set<LineSegment, LineSegment::Hash> lineSegmentSet{};
+	for (size_t faceIdx = 1; faceIdx < facesList.size(); ++faceIdx)
 	{
+		const auto& face = facesList.at(faceIdx);
+		std::unordered_set<int> tmp_linkedFacesSet = { static_cast<int>(faceIdx) };
 		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
 		{
-			LineSegmentOfVertexIndexPair lineSegmentOfVertexIndexPair(face.vertexIndices.at(i - 1),
-																	  face.vertexIndices.at(i));
-			lineSegmentOfVertexIndexPairSet.insert(
-				lineSegmentOfVertexIndexPair);
+			LineSegment tmp_lineSegment(face.vertexIndices.at(i - 1),
+										face.vertexIndices.at(i), tmp_linkedFacesSet);
+
+			auto search = lineSegmentSet.find(tmp_lineSegment);
+			if (search != lineSegmentSet.end())
+			{
+				std::unordered_set<int> new_linkedFacesSet = search->getLinkedFaceIndices();
+				new_linkedFacesSet.insert(tmp_linkedFacesSet.begin(), tmp_linkedFacesSet.end());
+				tmp_lineSegment = LineSegment(
+					tmp_lineSegment.getPair(),
+					new_linkedFacesSet);
+				lineSegmentSet.erase(*search);
+			}
+
+			lineSegmentSet.insert(tmp_lineSegment);
 		}
-		if (face.vertexIndices.size() >= 2)
-		{
-			LineSegmentOfVertexIndexPair  lineSegmentOfVertexIndexPair(face.vertexIndices.back(),
-																	   face.vertexIndices.front());
-			lineSegmentOfVertexIndexPairSet.insert(
-				lineSegmentOfVertexIndexPair);
-		}
-	}*/
+	}
+	std::vector<LineSegment> lineSegmentsList(1, LineSegment());
+	std::copy(lineSegmentSet.begin(), lineSegmentSet.end(),
+			  std::back_inserter(lineSegmentsList));
+	return lineSegmentsList;
 }
 
 int main(int argc, char* argv[])
@@ -120,8 +129,6 @@ int main(int argc, char* argv[])
 	}
 	std::string filename = argv[1];
 
-	//std::filesystem::path filepath = filename;
-	//if (!std::filesystem::exists(filepath))
 	boost::filesystem::path filepath = filename;
 	if (!boost::filesystem::exists(filepath))
 	{
@@ -148,17 +155,17 @@ int main(int argc, char* argv[])
 	file.seekg(0);
 
 	std::vector<Vertex> vertexList{ };
-	vertexList.reserve(newline_count / 2);
+	vertexList.reserve(newline_count / 8);
 	vertexList.push_back(Vertex{});
 	std::vector<VertexNormal> vertexNormalList{  };
-	vertexNormalList.reserve(newline_count / 2);
+	vertexNormalList.reserve(newline_count / 8);
 	vertexNormalList.push_back(VertexNormal{});
 	std::vector<TextureCoordinate> textureCoordinateList{  };
-	textureCoordinateList.reserve(newline_count / 2);
+	textureCoordinateList.reserve(newline_count / 8);
 	textureCoordinateList.push_back(TextureCoordinate{});
 
 	std::vector<Face> facesList{};
-	facesList.reserve(newline_count / 2);
+	facesList.reserve(newline_count / 8);
 	facesList.push_back(Face{});
 
 
@@ -193,7 +200,7 @@ int main(int argc, char* argv[])
 			facesList.push_back(Face{ getVertexIdsFromLine(line) });
 		}
 	}
-
+	auto lineSegmentsList = calculateLineSegmentsList(facesList);
 	file.close();
 
 	return 0;
