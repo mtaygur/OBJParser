@@ -36,7 +36,7 @@ struct Face
 class LineSegment
 {
 	public:
-	LineSegment(int firstVertexIndex, int secondVertexIndex, const std::unordered_set<int>& linkedFaceIndices)
+	LineSegment(int firstVertexIndex, int secondVertexIndex, const std::set<int>& linkedFaceIndices)
 	{
 		if (firstVertexIndex == secondVertexIndex)
 		{
@@ -48,7 +48,7 @@ class LineSegment
 		this->linkedFaceIndices.insert(linkedFaceIndices.begin(), linkedFaceIndices.end());
 	}
 
-	LineSegment(std::pair<int, int> pair, const std::unordered_set<int>& linkedFaceIndices)
+	LineSegment(const std::pair<int, int>& pair, const std::set<int>& linkedFaceIndices)
 	{
 		if (pair.first == pair.second)
 		{
@@ -75,7 +75,7 @@ class LineSegment
 		return std::make_pair(firstVertexIndex(), secondVertexIndex());
 	}
 
-	std::unordered_set<int> getLinkedFaceIndices() const
+	std::set<int> getLinkedFaceIndices() const
 	{
 		return linkedFaceIndices;
 	}
@@ -100,6 +100,6 @@ class LineSegment
 	int firstVertexIndex() const { return *data.begin(); }
 	int secondVertexIndex() const { return *std::next(data.begin()); }
 	std::set<int> data;
-	std::unordered_set<int> linkedFaceIndices{};
+	std::set<int> linkedFaceIndices{};
 };
 

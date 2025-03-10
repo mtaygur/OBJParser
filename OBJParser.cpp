@@ -2,6 +2,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 
 
@@ -89,33 +90,36 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 
 std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
 {
-	std::unordered_set<LineSegment, LineSegment::Hash> lineSegmentSet{};
+	std::map<std::set<int>, std::set<int>> lineSegmentMap{};
 	for (size_t faceIdx = 1; faceIdx < facesList.size(); ++faceIdx)
 	{
 		const auto& face = facesList.at(faceIdx);
-		std::unordered_set<int> tmp_linkedFacesSet = { static_cast<int>(faceIdx) };
+		std::set<int> setForFace = { static_cast<int>(faceIdx) };
 		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
 		{
-			LineSegment tmp_lineSegment(face.vertexIndices.at(i - 1),
-										face.vertexIndices.at(i), tmp_linkedFacesSet);
-
-			auto search = lineSegmentSet.find(tmp_lineSegment);
-			if (search != lineSegmentSet.end())
+			auto lineSegmentVertexPairSet = std::set<int>{
+				face.vertexIndices.at(i - 1), face.vertexIndices.at(i) };
+			auto search = lineSegmentMap.find(lineSegmentVertexPairSet);
+			if (search != lineSegmentMap.end())
 			{
-				std::unordered_set<int> new_linkedFacesSet = search->getLinkedFaceIndices();
-				new_linkedFacesSet.insert(tmp_linkedFacesSet.begin(), tmp_linkedFacesSet.end());
-				tmp_lineSegment = LineSegment(
-					tmp_lineSegment.getPair(),
-					new_linkedFacesSet);
-				lineSegmentSet.erase(*search);
+				lineSegmentMap[lineSegmentVertexPairSet].insert(
+					setForFace.begin(), setForFace.end());
 			}
-
-			lineSegmentSet.insert(tmp_lineSegment);
+			else
+			{
+				lineSegmentMap[lineSegmentVertexPairSet] = setForFace;
+			}
 		}
 	}
-	std::vector<LineSegment> lineSegmentsList(1, LineSegment());
-	std::copy(lineSegmentSet.begin(), lineSegmentSet.end(),
-			  std::back_inserter(lineSegmentsList));
+
+	std::vector<LineSegment> lineSegmentsList(lineSegmentMap.size() + 1);
+	lineSegmentsList[0] = LineSegment();
+	size_t listIdx(1);
+	for (const auto& [vertexPairSet, linkedFacesSet] : lineSegmentMap)
+	{
+		assert(vertexPairSet.size() == 2);
+		lineSegmentsList[listIdx++] = LineSegment(*vertexPairSet.begin(), *std::next(vertexPairSet.begin()), linkedFacesSet);
+	}
 	return lineSegmentsList;
 }
 
