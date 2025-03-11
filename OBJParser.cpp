@@ -90,36 +90,21 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 
 std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
 {
-	std::map<std::set<int>, std::set<int>> lineSegmentMap{};
+	std::set<LineSegment> lineSegmentSet{ LineSegment() };
 	for (size_t faceIdx = 1; faceIdx < facesList.size(); ++faceIdx)
 	{
 		const auto& face = facesList.at(faceIdx);
-		std::set<int> setForFace = { static_cast<int>(faceIdx) };
 		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
 		{
-			auto lineSegmentVertexPairSet = std::set<int>{
-				face.vertexIndices.at(i - 1), face.vertexIndices.at(i) };
-			auto search = lineSegmentMap.find(lineSegmentVertexPairSet);
-			if (search != lineSegmentMap.end())
-			{
-				lineSegmentMap[lineSegmentVertexPairSet].insert(
-					setForFace.begin(), setForFace.end());
-			}
-			else
-			{
-				lineSegmentMap[lineSegmentVertexPairSet] = setForFace;
-			}
+			auto lineSegment = LineSegment(std::make_pair(
+				face.vertexIndices.at(i - 1), face.vertexIndices.at(i)));
+			lineSegmentSet.insert(lineSegment);
 		}
 	}
 
-	std::vector<LineSegment> lineSegmentsList(lineSegmentMap.size() + 1);
-	lineSegmentsList[0] = LineSegment();
-	size_t listIdx(1);
-	for (const auto& [vertexPairSet, linkedFacesSet] : lineSegmentMap)
-	{
-		assert(vertexPairSet.size() == 2);
-		lineSegmentsList[listIdx++] = LineSegment(*vertexPairSet.begin(), *std::next(vertexPairSet.begin()), linkedFacesSet);
-	}
+	std::vector<LineSegment> lineSegmentsList(lineSegmentSet.begin(),
+											  lineSegmentSet.end());
+
 	return lineSegmentsList;
 }
 
