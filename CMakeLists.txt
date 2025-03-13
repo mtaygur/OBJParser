@@ -24,4 +24,15 @@ target_link_libraries(OBJParser Boost::filesystem)
 
 set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-DDEBUG)
+	add_definitions(/ZI /Zi)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG /OPT:REF /OPT:ICF")
+	if(ENABLE_PROFILER STREQUAL "ON")
+		add_definitions(/GH /Gh)
+		find_library(PROFILING_LIB micro-profiler_x64)
+		target_link_libraries(OBJParser ${PROFILING_LIB} )
+	endif()
+endif()
+
 # TODO: Add tests and install targets if needed.
