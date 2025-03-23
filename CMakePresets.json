@@ -34,7 +34,8 @@
         "strategy": "external"
       },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXE_LINKER_FLAGS": "/DEBUG"
       }
     },
     {
@@ -47,6 +48,16 @@
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "ENABLE_PROFILER": "ON",
+        "CMAKE_EXE_LINKER_FLAGS": "/DEBUG"
+      }
+    },
+    {
+      "name": "x64-release-profiler",
+      "displayName": "x64 Profiler Release with Debug",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "ENABLE_PROFILER": "ON"
       }
     },
