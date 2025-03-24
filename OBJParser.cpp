@@ -1,91 +1,79 @@
 ﻿#include "OBJParser.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <regex>
+#include <string>
 
 
 
 std::vector<int> getVertexIdsFromLine(std::string& line)
 {
-	std::vector<int> vertexIds{};
-	auto words_list_extract = [](std::string& line,
-								 std::regex pattern) -> std::vector<std::string> {
-		// Iterator to find all matches
-		std::vector<std::string> words_list;
-		auto words_begin = std::sregex_iterator(line.begin(), line.end(), pattern);
-		auto words_end = std::sregex_iterator();
-		for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+	// Remove comments from the line
+	size_t commentCharPos = line.find_first_of("#");
+	if (commentCharPos != std::string::npos)
 		{
-			std::smatch match = *i;
-			words_list.push_back(match.str());
+		line = line.substr(0, commentCharPos);
 		}
-		return words_list;
-	};
 
-	//line = "f  435/789/324  765/25/213  987/9789/213  5675/24234/2413";
-	std::regex pattern = std::regex(" -?\\d+/-?\\d+/-?\\d+");
-	if (std::regex_search(line, pattern))
+	// Remove leading face prefix
+	size_t fCharPos = line.find_first_of("f");
+	if (fCharPos != std::string::npos)
 	{
-		auto words_list = words_list_extract(line, pattern);
-		for (auto& word : words_list)
-		{
-			size_t first_slash_idx = word.find_first_of("/");
-			word = word.substr(0, first_slash_idx);
-			int vertexId = std::stoi(word);
-			vertexIds.push_back(vertexId);
-		}
-		return vertexIds;
+		line = line.substr(fCharPos + 1);
 	}
+	else
+		{
+		std::cerr << "Invalid face definition: " << line << std::endl;
+		return {};
+		}
 
-	//line = "f  435//324  765//213 ";
-	pattern = std::regex(" -?\\d+//-?\\d+");
-	if (std::regex_search(line, pattern))
+	std::string lineFirstWord = line.substr(0, line.find_first_of(" "));
+	size_t wordFirstSeparatorPos = lineFirstWord.find_first_of("/");
+	size_t wordLastSeparatorPos = lineFirstWord.find_last_of("/");
+
+	std::vector<int> vertexIds;
+	vertexIds.reserve(line.size()); // Reserve space (generously)
+	static const boost::char_separator<char> sep(" ");
+	boost::tokenizer<boost::char_separator<char>> tok(line, sep);
+
+	if (wordFirstSeparatorPos == std::string::npos && wordLastSeparatorPos == std::string::npos)
 	{
-		auto words_list = words_list_extract(line, pattern);
-		for (auto& word : words_list)
+		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
 		{
-			size_t first_slash_idx = word.find_first_of("/");
-			word = word.substr(0, first_slash_idx);
-			int vertexId = std::stoi(word);
-			vertexIds.push_back(vertexId);
+			vertexIds.emplace_back(std::stoi(*beg));
 		}
-		return vertexIds;
-	}
-
-
-	//line = "f  435/324  765/213  987/213";
-	pattern = std::regex(" -?\\d+/-?\\d+");
-	if (std::regex_search(line, pattern))
+	} // first variant: line = "f  -324  213  213";
+	else if (wordFirstSeparatorPos == wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
-		auto words_list = words_list_extract(line, pattern);
-		for (auto& word : words_list)
+		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
 		{
-			size_t first_slash_idx = word.find_first_of("/");
-			word = word.substr(0, first_slash_idx);
-			int vertexId = std::stoi(word);
-			vertexIds.push_back(vertexId);
-		}
-		return vertexIds;
+			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
 	}
-
-	//line = "f  -324  213  213";
-	pattern = std::regex(" -?\\d+");
-	if (std::regex_search(line, pattern))
+	} // second variant: line = "f  435/324  765/213  987/213";
+	else if (wordFirstSeparatorPos + 1 == wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
-		auto words_list = words_list_extract(line, pattern);
-		for (auto& word : words_list)
+		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
 		{
-			int vertexId = std::stoi(word);
-			vertexIds.push_back(vertexId);
+			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
 		}
-		return vertexIds;
-	}
-
-	//should not reach here	
+	} // third variant: line = "f  435//324  765//213 ";
+	else if (wordFirstSeparatorPos + 1 < wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
+	{
+		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+		{
+			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
+		}
+	} // fourth variant: line = "f  435/789/324  765/25/213  987/9789/213  5675/24234/2413";
+	else
+	{
 	std::cerr << "Invalid face format: " << line << std::endl;
 	return {};
+	} // should not reach here
+	return vertexIds;
+
 }
 
 std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
@@ -157,36 +145,44 @@ int main(int argc, char* argv[])
 	facesList.reserve(newline_count / 8);
 	facesList.push_back(Face{});
 
-
+	size_t lineCounter(0);
 	std::string line;
 	while (getline(file, line))
 	{
-		std::istringstream iss(line);
-		std::string prefix;
-		iss >> prefix;
+		lineCounter++;
+
+		// Remove spaces from the beginning and the end
+		boost::algorithm::trim(line);
+
+		std::vector<std::string> vertexString;
+		vertexString.reserve(4);
+		boost::algorithm::split(vertexString, line,
+								boost::is_any_of(" "),
+								boost::token_compress_on);
+		auto prefix = vertexString.at(0);
 
 		if (prefix == "v")
 		{
-			Vertex vertex;
-			iss >> vertex.x >> vertex.y >> vertex.z;
-			vertexList.push_back(vertex);
+			vertexList.emplace_back(Vertex(std::stof(vertexString.at(1)),
+										   std::stof(vertexString.at(2)),
+										   std::stof(vertexString.at(3))));
 		}
 		else if (prefix == "vn")
 		{
-			VertexNormal vertexNormal;
-			iss >> vertexNormal.x >> vertexNormal.y >> vertexNormal.z;
-			vertexNormalList.push_back(vertexNormal);
+			vertexNormalList.emplace_back(VertexNormal(std::stof(vertexString.at(1)),
+													   std::stof(vertexString.at(2)),
+													   std::stof(vertexString.at(3))));
 		}
 		else if (prefix == "vt")
 		{
-			TextureCoordinate textureCoordinate;
-			iss >> textureCoordinate.u >> textureCoordinate.v >> textureCoordinate.w;
-			textureCoordinateList.push_back(textureCoordinate);
+			textureCoordinateList.emplace_back(TextureCoordinate(std::stof(vertexString.at(1)),
+																 (vertexString.size() > 2) ? std::stof(vertexString.at(2)) : 0.,
+																 (vertexString.size() > 3) ? std::stof(vertexString.at(3)) : 0.));
 		}
 
 		else if (prefix == "f")
 		{
-			facesList.push_back(Face{ getVertexIdsFromLine(line) });
+			facesList.emplace_back(Face{ getVertexIdsFromLine(line) });
 		}
 	}
 	auto lineSegmentsList = calculateLineSegmentsList(facesList);
