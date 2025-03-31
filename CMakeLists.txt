@@ -5,15 +5,15 @@ cmake_minimum_required (VERSION 3.8)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+  #cmake_policy(SET CMP0141 NEW)
+  #set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
 project ("OBJParser")
 
-#set(Boost_USE_STATIC_LIBS ON)
-#set(Boost_USE_MULTITHREADED ON)
-#set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(Boost 1.63 REQUIRED COMPONENTS filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -23,20 +23,25 @@ add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
 target_link_libraries(OBJParser Boost::filesystem)
 
 set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
+add_definitions(/Wall)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 	add_definitions(-DDEBUG)
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_compile_options(-g)
 	elseif(MSVC)
-		add_compile_options(/ZI)
+		add_compile_options(/Zi)
 	endif()
 	if(ENABLE_PROFILER STREQUAL "ON" AND MSVC)
 		add_definitions(/GH /Gh)
 		find_library(PROFILING_LIB micro-profiler_x64)
 		target_link_libraries(OBJParser ${PROFILING_LIB} )
 	endif()
+
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_definitions(-O2)
 	elseif(MSVC)
@@ -47,6 +52,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWith
 		find_library(PROFILING_LIB micro-profiler_x64)
 		target_link_libraries(OBJParser ${PROFILING_LIB} )
 	endif()
+
 endif()
 
 # TODO: Add tests and install targets if needed.
