@@ -23,7 +23,11 @@ add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
 target_link_libraries(OBJParser Boost::filesystem)
 
 set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
-add_definitions(/Wall)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	add_compile_options(-Wall)
+elseif(MSVC)
+	add_definitions(/Wall)
+endif()
 
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
