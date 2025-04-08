@@ -50,8 +50,8 @@ jobs:
         id: runcmake
         with:
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          configurePreset: 'x64-release'
-          buildPreset: 'build-release'
+          configurePreset: 'linux-release'
+          buildPreset: 'build-linux-release'
       - name: List $RUNNER_WORKSPACE after build
         run: find $RUNNER_WORKSPACE
         shell: bash

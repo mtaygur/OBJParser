@@ -181,6 +181,14 @@
     {
       "name": "build-debug",
       "configurePreset": "x64-debug"
+    },
+    {
+      "name": "build-linux-release",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "build-linux-debug",
+      "configurePreset": "linux-debug"
     }
   ]
 }
