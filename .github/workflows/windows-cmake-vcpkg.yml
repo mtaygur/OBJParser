@@ -11,7 +11,7 @@
 #   vcpkg's Binary Caching backed by GH Action cache is being used. It will be a no-op if 
 #   dependencies are restored from GH Action cache.
 # - Finally builds the sources with Ninja.
-name: hosted-ninja-vcpkg_submod-cacheoff
+name: windows-cmake-vcpkg-build
 on: [push, workflow_dispatch]
 
 jobs:
@@ -34,9 +34,6 @@ jobs:
           fetch-depth: 0
 
       - uses: lukka/get-cmake@latest
-      - name: List $RUNNER_WORKSPACE before vcpkg is setup
-        run: find $RUNNER_WORKSPACE
-        shell: bash
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -46,9 +43,6 @@ jobs:
           # vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/vcpkg.json'
 
-      - name: List $RUNNER_WORKSPACE before build
-        run: find $RUNNER_WORKSPACE
-        shell: bash
       - name: Prints output of run-vcpkg's action.
         run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_DEFAULT_TRIPLET_OUT }}' "
       - name: Run CMake+vcpkg+Ninja
