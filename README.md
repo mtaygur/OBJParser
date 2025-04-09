@@ -1,4 +1,5 @@
 # OBJParser
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5163b648feed48718de4ed69edf45760)](https://app.codacy.com/gh/mtaygur/OBJParser?utm_source=github.com&utm_medium=referral&utm_content=mtaygur/OBJParser&utm_campaign=Badge_Grade)
 [![Linux](https://github.com/mtaygur/OBJParser/workflows/linux-cmake-vcpkg-build/badge.svg)](https://github.com/mtaygur/OBJParser/actions?query=workflow%3Alinux)
 [![Windows](https://github.com/mtaygur/OBJParser/workflows/windows-cmake-vcpkg-build/badge.svg)](https://github.com/mtaygur/OBJParser/actions?query=workflow%3Awindows)
 
