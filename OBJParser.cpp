@@ -14,9 +14,9 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 	// Remove comments from the line
 	size_t commentCharPos = line.find_first_of("#");
 	if (commentCharPos != std::string::npos)
-		{
+	{
 		line = line.substr(0, commentCharPos);
-		}
+	}
 
 	// Remove leading face prefix
 	size_t fCharPos = line.find_first_of("f");
@@ -25,10 +25,10 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 		line = line.substr(fCharPos + 1);
 	}
 	else
-		{
+	{
 		std::cerr << "Invalid face definition: " << line << std::endl;
 		return {};
-		}
+	}
 
 	std::string lineFirstWord = line.substr(0, line.find_first_of(" "));
 	size_t wordFirstSeparatorPos = lineFirstWord.find_first_of("/");
@@ -51,7 +51,7 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
 		{
 			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
-	}
+		}
 	} // second variant: line = "f  435/324  765/213  987/213";
 	else if (wordFirstSeparatorPos + 1 == wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
@@ -69,8 +69,8 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 	} // fourth variant: line = "f  435/789/324  765/25/213  987/9789/213  5675/24234/2413";
 	else
 	{
-	std::cerr << "Invalid face format: " << line << std::endl;
-	return {};
+		std::cerr << "Invalid face format: " << line << std::endl;
+		return {};
 	} // should not reach here
 	return vertexIds;
 
@@ -98,7 +98,7 @@ std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& face
 
 int main(int argc, char* argv[])
 {
-
+	double testvar;
 	if (argc < 2)
 	{
 		std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
