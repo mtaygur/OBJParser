@@ -94,7 +94,7 @@ std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& face
 
 int main(int argc, char* argv[])
 {
-
+	double testvar;
 	if (argc < 2)
 	{
 		std::cout << "Usage: " << argv[0] << " <filename>\n";
