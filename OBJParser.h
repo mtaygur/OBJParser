@@ -47,7 +47,7 @@ class LineSegment
 			std::make_pair(std::min(firstVertexIndex, secondVertexIndex), std::max(firstVertexIndex, secondVertexIndex));
 	}
 
-	LineSegment(const std::pair<int, int>& pair)
+	explicit LineSegment(const std::pair<int, int>& pair)
 	{
 		if (pair.first == pair.second)
 		{
@@ -58,16 +58,11 @@ class LineSegment
 			std::make_pair(std::min(pair.first, pair.second), std::max(pair.first, pair.second));
 	}
 
-	LineSegment()
-	{
-	}
+	LineSegment() = default;
 
 	std::pair<int, int> getVertexPair() const { return vertexPair; }
 
-	bool operator<(const LineSegment& other) const
-	{
-		return vertexPair < other.vertexPair;
-	}
+	auto operator<=>(const LineSegment& other) const = default;
 
 	private:
 	std::pair<int, int> vertexPair{};
