@@ -4,7 +4,6 @@
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <string>
 
 
@@ -12,23 +11,21 @@
 std::vector<int> getVertexIdsFromLine(std::string& line)
 {
 	// Remove comments from the line
-	size_t commentCharPos = line.find_first_of("#");
-	if (commentCharPos != std::string::npos)
-		{
-		line = line.substr(0, commentCharPos);
-		}
+	if (size_t commentCharPos = line.find_first_of("#"); commentCharPos != std::string::npos)
+	{
+		line.resize(commentCharPos);
+	}
 
-	// Remove leading face prefix
-	size_t fCharPos = line.find_first_of("f");
-	if (fCharPos != std::string::npos)
+	// Remove leading face prefix	
+	if (size_t fCharPos = line.find_first_of("f"); fCharPos != std::string::npos)
 	{
 		line = line.substr(fCharPos + 1);
 	}
 	else
-		{
-		std::cerr << "Invalid face definition: " << line << std::endl;
+	{
+		std::cout << "Invalid face definition: " << line << "\n";
 		return {};
-		}
+	}
 
 	std::string lineFirstWord = line.substr(0, line.find_first_of(" "));
 	size_t wordFirstSeparatorPos = lineFirstWord.find_first_of("/");
@@ -41,39 +38,38 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 
 	if (wordFirstSeparatorPos == std::string::npos && wordLastSeparatorPos == std::string::npos)
 	{
-		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+		for (auto beg = tok.begin(); beg != tok.end(); ++beg)
 		{
 			vertexIds.emplace_back(std::stoi(*beg));
 		}
 	} // first variant: line = "f  -324  213  213";
 	else if (wordFirstSeparatorPos == wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
-		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+		for (auto beg = tok.begin(); beg != tok.end(); ++beg)
 		{
 			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
-	}
+		}
 	} // second variant: line = "f  435/324  765/213  987/213";
 	else if (wordFirstSeparatorPos + 1 == wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
-		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+		for (auto beg = tok.begin(); beg != tok.end(); ++beg)
 		{
 			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
 		}
 	} // third variant: line = "f  435//324  765//213 ";
 	else if (wordFirstSeparatorPos + 1 < wordLastSeparatorPos && wordFirstSeparatorPos != std::string::npos && wordLastSeparatorPos != std::string::npos)
 	{
-		for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+		for (auto beg = tok.begin(); beg != tok.end(); ++beg)
 		{
 			vertexIds.emplace_back(std::stoi((*beg).substr(0, (*beg).find_first_of("/"))));
 		}
 	} // fourth variant: line = "f  435/789/324  765/25/213  987/9789/213  5675/24234/2413";
 	else
 	{
-	std::cerr << "Invalid face format: " << line << std::endl;
-	return {};
+		std::cout << "Invalid face format: " << line << "\n";
+		return {};
 	} // should not reach here
 	return vertexIds;
-
 }
 
 std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
@@ -101,22 +97,21 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+		std::cout << "Usage: " << argv[0] << " <filename>\n";
 		return 1;
 	}
 	std::string filename = argv[1];
 
-	boost::filesystem::path filepath = filename;
-	if (!boost::filesystem::exists(filepath))
+	if (boost::filesystem::path filepath = filename; !boost::filesystem::exists(filepath))
 	{
-		std::cout << "File not found: " << filename << std::endl;
+		std::cout << "File not found: " << filename << "\n";
 		return 1;
 	}
 
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		std::cerr << "Unable to open file: " << filename << std::endl;
+		std::cout << "Unable to open file: " << filename << "\n";
 		return 1;
 	}
 
@@ -132,18 +127,19 @@ int main(int argc, char* argv[])
 	file.seekg(0);
 
 	std::vector<Vertex> vertexList{ };
-	vertexList.reserve(newline_count / 8);
-	vertexList.push_back(Vertex{});
+	constexpr int lineCountDivider(8);
+	vertexList.reserve(newline_count / lineCountDivider);
+	vertexList.emplace_back();
 	std::vector<VertexNormal> vertexNormalList{  };
-	vertexNormalList.reserve(newline_count / 8);
-	vertexNormalList.push_back(VertexNormal{});
+	vertexNormalList.reserve(newline_count / lineCountDivider);
+	vertexNormalList.emplace_back();
 	std::vector<TextureCoordinate> textureCoordinateList{  };
-	textureCoordinateList.reserve(newline_count / 8);
-	textureCoordinateList.push_back(TextureCoordinate{});
+	textureCoordinateList.reserve(newline_count / lineCountDivider);
+	textureCoordinateList.emplace_back();
 
 	std::vector<Face> facesList{};
-	facesList.reserve(newline_count / 8);
-	facesList.push_back(Face{});
+	facesList.reserve(newline_count / lineCountDivider);
+	facesList.emplace_back();
 
 	size_t lineCounter(0);
 	std::string line;
@@ -159,30 +155,30 @@ int main(int argc, char* argv[])
 		boost::algorithm::split(vertexString, line,
 								boost::is_any_of(" "),
 								boost::token_compress_on);
-		auto prefix = vertexString.at(0);
+		std::string prefix = vertexString.at(0);
 
 		if (prefix == "v")
 		{
-			vertexList.emplace_back(Vertex(std::stof(vertexString.at(1)),
-										   std::stof(vertexString.at(2)),
-										   std::stof(vertexString.at(3))));
+			vertexList.emplace_back(std::stof(vertexString.at(1)),
+									std::stof(vertexString.at(2)),
+									std::stof(vertexString.at(3)));
 		}
 		else if (prefix == "vn")
 		{
-			vertexNormalList.emplace_back(VertexNormal(std::stof(vertexString.at(1)),
-													   std::stof(vertexString.at(2)),
-													   std::stof(vertexString.at(3))));
+			vertexNormalList.emplace_back(std::stof(vertexString.at(1)),
+										  std::stof(vertexString.at(2)),
+										  std::stof(vertexString.at(3)));
 		}
 		else if (prefix == "vt")
 		{
-			textureCoordinateList.emplace_back(TextureCoordinate(std::stof(vertexString.at(1)),
-																 (vertexString.size() > 2) ? std::stof(vertexString.at(2)) : 0.,
-																 (vertexString.size() > 3) ? std::stof(vertexString.at(3)) : 0.));
+			textureCoordinateList.emplace_back(std::stof(vertexString.at(1)),
+											   (vertexString.size() > 2) ? std::stof(vertexString.at(2)) : 0.,
+											   (vertexString.size() > 3) ? std::stof(vertexString.at(3)) : 0.);
 		}
 
 		else if (prefix == "f")
 		{
-			facesList.emplace_back(Face{ getVertexIdsFromLine(line) });
+			facesList.emplace_back(getVertexIdsFromLine(line));
 		}
 	}
 	auto lineSegmentsList = calculateLineSegmentsList(facesList);
