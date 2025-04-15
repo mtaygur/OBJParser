@@ -1,0 +1,76 @@
+{
+  "configurations": [
+    {
+      "name": "build-release",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-release"
+    },
+    {
+      "name": "x64 Profiler Release with Debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-release-profiler"
+    },
+    {
+      "name": "x64 Release with Debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-release-debug"
+    },
+    {
+      "name": "build-debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-debug"
+    },
+    {
+      "name": "x64 Profiler Debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-debug-profiler"
+    },
+    {
+      "name": "x64 MinGW Release",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "linux_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-mingw-release"
+    },
+    {
+      "name": "x64 MinGW Debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "linux_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\x64-mingw-debug"
+    },
+    {
+      "name": "build-linux-release",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "linux_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\linux-release"
+    },
+    {
+      "name": "build-linux-debug",
+      "description": "This file is only necessary for SonarLint. SonarLint is not able to handle CMakePresets yet",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "linux_x64" ],
+      "buildRoot": "${workspaceRoot}\\out\\build\\linux-debug"
+    }
+  ]
+}

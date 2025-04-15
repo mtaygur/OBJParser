@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for OBJParser, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.15)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -23,20 +23,15 @@ add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
 target_link_libraries(OBJParser Boost::filesystem)
 
 set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	add_compile_options(-Wall)
-elseif(MSVC)
-	add_definitions(/Wall)
-endif()
-
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
-	add_definitions(-DDEBUG)
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_compile_options(-g)
+		add_definitions(-DDEBUG)
 	elseif(MSVC)
 		add_compile_options(/Zi)
+		add_definitions(/DEBUG)
 	endif()
 	if(ENABLE_PROFILER STREQUAL "ON" AND MSVC)
 		add_definitions(/GH /Gh)
