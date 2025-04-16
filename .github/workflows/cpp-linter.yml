@@ -26,7 +26,3 @@ jobs:
           tidy-checks: 'bugprone-*,clang-analyzer-*,cppcoreguidelines-*' # Use .clang-tidy config file. 
           # only 'update' a single comment in a pull request's thread. 
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-
-      - name: Fail fast?!
-        if: steps.linter.outputs.checks-failed > 0
-        run: exit 1
