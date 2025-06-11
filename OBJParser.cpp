@@ -7,7 +7,6 @@
 #include <string>
 
 
-
 std::vector<int> getVertexIdsFromLine(std::string& line)
 {
 	// Remove comments from the line
@@ -72,48 +71,30 @@ std::vector<int> getVertexIdsFromLine(std::string& line)
 	return vertexIds;
 }
 
-std::vector<LineSegment> calculateLineSegmentsList(const std::vector<Face>& facesList)
+OBJParser::OBJData::OBJData(const std::string& filename_) : filename(filename_)
 {
-	std::set<LineSegment> lineSegmentSet{ LineSegment() };
-	for (size_t faceIdx = 1; faceIdx < facesList.size(); ++faceIdx)
+	if (filename.empty())
 	{
-		const auto& face = facesList.at(faceIdx);
-		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
-		{
-			auto lineSegment = LineSegment(std::make_pair(
-				face.vertexIndices.at(i - 1), face.vertexIndices.at(i)));
-			lineSegmentSet.insert(lineSegment);
-		}
+		std::cerr << "Filename cannot be empty" << std::endl;
+		throw std::runtime_error("Error: Filename cannot be empty");
 	}
 
-	std::vector<LineSegment> lineSegmentsList(lineSegmentSet.begin(),
-											  lineSegmentSet.end());
-
-	return lineSegmentsList;
-}
-
-int main(int argc, char* argv[])
-{
-	double testvar;
-	if (argc < 2)
+	// Check if the file exists
+	boost::filesystem::path filepath = filename;
+	if (!boost::filesystem::exists(filepath))
 	{
-		std::cout << "Usage: " << argv[0] << " <filename>\n";
-		return 1;
+		std::cerr << "File not found: " + filename << std::endl;
+		throw std::runtime_error("Error: File not found: " + filename);
 	}
-	std::string filename = argv[1];
 
-	if (boost::filesystem::path filepath = filename; !boost::filesystem::exists(filepath))
-	{
-		std::cout << "File not found: " << filename << "\n";
-		return 1;
-	}
 
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		std::cout << "Unable to open file: " << filename << "\n";
-		return 1;
+		std::cerr << "Unable to open file: " + filename << std::endl;
+		throw std::runtime_error("Error: Unable to open file: " + filename);
 	}
+
 
 	// Count the number of newlines to get an estimate how many vertex/face elements we would have
 	std::size_t newline_count = std::count(
@@ -125,21 +106,15 @@ int main(int argc, char* argv[])
 	// Return to the beginning of the file to start reading from the beginning
 	file.clear();
 	file.seekg(0);
-
-	std::vector<Vertex> vertexList{ };
-	constexpr int lineCountDivider(8);
-	vertexList.reserve(newline_count / lineCountDivider);
-	vertexList.emplace_back();
-	std::vector<VertexNormal> vertexNormalList{  };
-	vertexNormalList.reserve(newline_count / lineCountDivider);
-	vertexNormalList.emplace_back();
-	std::vector<TextureCoordinate> textureCoordinateList{  };
-	textureCoordinateList.reserve(newline_count / lineCountDivider);
-	textureCoordinateList.emplace_back();
-
-	std::vector<Face> facesList{};
-	facesList.reserve(newline_count / lineCountDivider);
-	facesList.emplace_back();
+	vertexList.reserve(newline_count / 8);
+	vertexList.emplace_back(Vertex{});
+	vertexNormalList.reserve(newline_count / 8);
+	vertexNormalList.emplace_back(VertexNormal{});
+	textureCoordinateList.reserve(newline_count / 8);
+	textureCoordinateList.emplace_back(TextureCoordinate{});
+	facesList.reserve(newline_count / 8);
+	facesList.emplace_back(Face{});
+	facesList.push_back(Face{});
 
 	size_t lineCounter(0);
 	std::string line;
@@ -159,30 +134,89 @@ int main(int argc, char* argv[])
 
 		if (prefix == "v")
 		{
-			vertexList.emplace_back(std::stof(vertexString.at(1)),
-									std::stof(vertexString.at(2)),
-									std::stof(vertexString.at(3)));
+			vertexList.emplace_back(Vertex{ std::stod(vertexString.at(1)),
+										   std::stod(vertexString.at(2)),
+										   std::stod(vertexString.at(3)) });
 		}
 		else if (prefix == "vn")
 		{
-			vertexNormalList.emplace_back(std::stof(vertexString.at(1)),
-										  std::stof(vertexString.at(2)),
-										  std::stof(vertexString.at(3)));
+			vertexNormalList.emplace_back(VertexNormal{ std::stod(vertexString.at(1)),
+													   std::stod(vertexString.at(2)),
+													   std::stod(vertexString.at(3)) });
 		}
 		else if (prefix == "vt")
 		{
-			textureCoordinateList.emplace_back(std::stof(vertexString.at(1)),
-											   (vertexString.size() > 2) ? std::stof(vertexString.at(2)) : 0.,
-											   (vertexString.size() > 3) ? std::stof(vertexString.at(3)) : 0.);
+			textureCoordinateList.emplace_back(TextureCoordinate{ std::stod(vertexString.at(1)),
+																 (vertexString.size() > 2) ? std::stod(vertexString.at(2)) : 0.,
+																 (vertexString.size() > 3) ? std::stod(vertexString.at(3)) : 0. });
 		}
-
 		else if (prefix == "f")
 		{
 			facesList.emplace_back(getVertexIdsFromLine(line));
 		}
 	}
-	auto lineSegmentsList = calculateLineSegmentsList(facesList);
+
 	file.close();
+}
+
+OBJParser::LineSegment::LineSegment(int firstVertexIndex, int secondVertexIndex)
+{
+	if (firstVertexIndex == secondVertexIndex)
+	{
+		throw std::invalid_argument(
+			"First and second vertex indices must be different");
+	}
+	vertexIndexPair =
+		std::make_pair(std::min(firstVertexIndex, secondVertexIndex), std::max(firstVertexIndex, secondVertexIndex));
+}
+
+OBJParser::LineSegment::LineSegment(const std::pair<int, int>& pair)
+{
+	if (pair.first == pair.second)
+	{
+		throw std::invalid_argument(
+			"First and second vertex indices must be different");
+	}
+	vertexIndexPair =
+		std::make_pair(std::min(pair.first, pair.second), std::max(pair.first, pair.second));
+}
+
+bool OBJParser::LineSegment::operator<(const OBJParser::LineSegment& other) const
+{
+	return vertexIndexPair < other.vertexIndexPair;
+}
+
+std::vector<OBJParser::LineSegment>& OBJParser::OBJData::calculateLineSegmentsList()
+{
+	std::set<OBJParser::LineSegment> lineSegmentSet{ OBJParser::LineSegment() };
+	for (size_t faceIdx = 1; faceIdx < facesList.size(); ++faceIdx)
+	{
+		const auto& face = facesList.at(faceIdx);
+		for (size_t i = 1; i < face.vertexIndices.size(); ++i)
+		{
+			auto lineSegment = OBJParser::LineSegment(std::make_pair(
+				face.vertexIndices.at(i - 1), face.vertexIndices.at(i)));
+			lineSegmentSet.insert(lineSegment);
+		}
+	}
+	lineSegmentsList.clear();
+	lineSegmentsList.assign(lineSegmentSet.begin(),
+							lineSegmentSet.end());
+
+	return lineSegmentsList;
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 2)
+	{
+		std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+		return 1;
+	}
+	std::string filename = argv[1];
+
+	OBJParser::OBJData data(filename);
+	std::vector<OBJParser::LineSegment> lineSegmentsList = data.calculateLineSegmentsList();
 
 	return 0;
 }

@@ -1,70 +1,62 @@
 ﻿#pragma once
-#include <boost/functional/hash.hpp>
 #include <set>
 #include <stdexcept>
 #include <unordered_set>
 #include <vector>
 
-
-struct Vertex
+namespace OBJParser
 {
-	double x{ 0.0 };
-	double y{ 0.0 };
-	double z{ 0.0 };
-};
-
-struct VertexNormal
-{
-	double x{ 0.0 };
-	double y{ 0.0 };
-	double z{ 0.0 };
-};
-
-struct TextureCoordinate
-{
-	double u{ 0.0 };
-	double v{ 0.0 };
-	double w{ 0.0 };
-};
-
-struct Face
-{
-	std::vector<int> vertexIndices{};
-};
-
-
-class LineSegment
-{
-	public:
-	LineSegment(int firstVertexIndex, int secondVertexIndex)
+	struct Vertex
 	{
-		if (firstVertexIndex == secondVertexIndex)
-		{
-			throw std::invalid_argument(
-				"First and second vertex indices must be different");
-		}
-		vertexPair =
-			std::make_pair(std::min(firstVertexIndex, secondVertexIndex), std::max(firstVertexIndex, secondVertexIndex));
-	}
+		double x{ 0.0 };
+		double y{ 0.0 };
+		double z{ 0.0 };
+	};
 
-	explicit LineSegment(const std::pair<int, int>& pair)
+	struct VertexNormal
 	{
-		if (pair.first == pair.second)
-		{
-			throw std::invalid_argument(
-				"First and second vertex indices must be different");
-		}
-		vertexPair =
-			std::make_pair(std::min(pair.first, pair.second), std::max(pair.first, pair.second));
-	}
+		double x{ 0.0 };
+		double y{ 0.0 };
+		double z{ 0.0 };
+	};
 
-	LineSegment() = default;
+	struct TextureCoordinate
+	{
+		double u{ 0.0 };
+		double v{ 0.0 };
+		double w{ 0.0 };
+	};
 
-	std::pair<int, int> getVertexPair() const { return vertexPair; }
+	struct Face
+	{
+		std::vector<int> vertexIndices{};
+	};
 
-	auto operator<=>(const LineSegment& other) const = default;
+	struct LineSegment
+	{
+		LineSegment(int firstVertexIndex, int secondVertexIndex);
+		LineSegment(const std::pair<int, int>& pair);
+		LineSegment() {}
 
-	private:
-	std::pair<int, int> vertexPair{};
-};
+		bool operator<(const LineSegment& other) const;
 
+		std::pair<int, int> vertexIndexPair{};
+	};
+
+	struct OBJData
+	{
+		OBJData(const std::string& filename_);
+		OBJData(const OBJData& other) = default;
+		OBJData(OBJData&& other) = default;
+
+		std::vector<LineSegment>& calculateLineSegmentsList();
+
+		std::string filename{};
+		std::vector<Vertex> vertexList{};
+		std::vector<VertexNormal> vertexNormalList{};
+		std::vector<TextureCoordinate> textureCoordinateList{};
+		std::vector<Face> facesList{};
+		std::vector<LineSegment> lineSegmentsList{};
+	};
+
+}
