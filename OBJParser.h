@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <set>
 #include <stdexcept>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -51,12 +52,16 @@ namespace OBJParser
 
 		std::vector<LineSegment>& calculateLineSegmentsList();
 
+		std::unordered_map<size_t, std::vector<size_t>>& calculateEdgeNeighborhoodList();
+
 		std::string filename{};
 		std::vector<Vertex> vertexList{};
 		std::vector<VertexNormal> vertexNormalList{};
 		std::vector<TextureCoordinate> textureCoordinateList{};
 		std::vector<Face> facesList{};
 		std::vector<LineSegment> lineSegmentsList{};
+		std::unordered_map<size_t, std::vector<size_t>>
+			faceIdxToAdjacentFacesIdxListMap{};
 	};
 
 }
