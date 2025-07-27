@@ -92,7 +92,7 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
 
   // Count the number of newlines to get an estimate how many vertex/face
   // elements we would have
-  std::size_t newline_count{
+  long long newline_count{
       std::count(std::istreambuf_iterator<char>(file),
                  std::istreambuf_iterator<char>(), '\n') };
 
