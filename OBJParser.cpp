@@ -27,7 +27,7 @@ std::vector<int> getVertexIdsFromLine(std::string &line) {
   size_t wordFirstSeparatorPos = lineFirstWord.find_first_of('/');
   size_t wordLastSeparatorPos = lineFirstWord.find_last_of('/');
 
-  std::vector<int> vertexIds;
+  std::vector<int> vertexIds{};
   vertexIds.reserve(line.size()); // Reserve space (generously)
   static const boost::char_separator<char> sep(" ");
   boost::tokenizer<boost::char_separator<char>> tok(line, sep);
@@ -78,7 +78,7 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
   }
 
   // Check if the file exists
-  boost::filesystem::path filepath = filename;
+  boost::filesystem::path filepath{ filename };
   if (!boost::filesystem::exists(filepath)) {
     std::cerr << "File not found: " + filename << "\n" << std::flush;
     throw std::runtime_error("Error: File not found: " + filename);
@@ -92,9 +92,9 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
 
   // Count the number of newlines to get an estimate how many vertex/face
   // elements we would have
-  std::size_t newline_count =
+  std::size_t newline_count{
       std::count(std::istreambuf_iterator<char>(file),
-                 std::istreambuf_iterator<char>(), '\n');
+                 std::istreambuf_iterator<char>(), '\n') };
 
   // Return to the beginning of the file to start reading from the beginning
   file.clear();
@@ -108,13 +108,13 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
   facesList.reserve(newline_count / 8);
   facesList.emplace_back(Face{});
 
-  std::string line;
+  std::string line{};
   while (getline(file, line)) {
 
     // Remove spaces from the beginning and the end
     boost::algorithm::trim(line);
 
-    std::vector<std::string> vertexString;
+    std::vector<std::string> vertexString{};
     vertexString.reserve(4);
     boost::algorithm::split(vertexString, line, boost::is_any_of(" "),
                             boost::token_compress_on);

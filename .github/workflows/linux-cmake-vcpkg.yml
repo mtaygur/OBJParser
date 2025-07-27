@@ -12,7 +12,7 @@
 #   dependencies are restored from GH Action cache.
 # - Finally builds the sources with Ninja.
 name: linux-cmake-vcpkg-build
-on: [push, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 
 jobs:
   job:
