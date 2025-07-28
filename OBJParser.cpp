@@ -74,20 +74,20 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
     : filename(filename_) {
   if (filename.empty()) {
     std::cerr << "Filename cannot be empty\n" << std::flush;
-    throw std::runtime_error("Error: Filename cannot be empty");
+    throw std::invalid_argument("Error: Filename cannot be empty");
   }
 
   // Check if the file exists
-  boost::filesystem::path filepath{ filename };
-  if (!boost::filesystem::exists(filepath)) {
+  if (boost::filesystem::path filepath{ filename }; 
+      !boost::filesystem::exists(filepath)) {
     std::cerr << "File not found: " + filename << "\n" << std::flush;
-    throw std::runtime_error("Error: File not found: " + filename);
+    throw std::invalid_argument("Error: File not found: " + filename);
   }
 
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "Unable to open file: " + filename << "\n" << std::flush;
-    throw std::runtime_error("Error: Unable to open file: " + filename);
+    throw std::invalid_argument("Error: Unable to open file: " + filename);
   }
 
   // Count the number of newlines to get an estimate how many vertex/face
@@ -100,13 +100,13 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
   file.clear();
   file.seekg(0);
   vertexList.reserve(newline_count / 8);
-  vertexList.emplace_back(Vertex{});
+  vertexList.emplace_back();
   vertexNormalList.reserve(newline_count / 8);
-  vertexNormalList.emplace_back(VertexNormal{});
+  vertexNormalList.emplace_back();
   textureCoordinateList.reserve(newline_count / 8);
-  textureCoordinateList.emplace_back(TextureCoordinate{});
+  textureCoordinateList.emplace_back();
   facesList.reserve(newline_count / 8);
-  facesList.emplace_back(Face{});
+  facesList.emplace_back();
 
   std::string line{};
   while (getline(file, line)) {
@@ -121,18 +121,18 @@ OBJParser::OBJData::OBJData(const std::string &filename_)
     std::string prefix = vertexString.at(0);
 
     if (prefix == "v") {
-      vertexList.emplace_back(Vertex{std::stod(vertexString.at(1)),
+      vertexList.emplace_back(std::stod(vertexString.at(1)),
                                      std::stod(vertexString.at(2)),
-                                     std::stod(vertexString.at(3))});
+                                     std::stod(vertexString.at(3)));
     } else if (prefix == "vn") {
-      vertexNormalList.emplace_back(VertexNormal{
+      vertexNormalList.emplace_back(
           std::stod(vertexString.at(1)), std::stod(vertexString.at(2)),
-          std::stod(vertexString.at(3))});
+          std::stod(vertexString.at(3)));
     } else if (prefix == "vt") {
-      textureCoordinateList.emplace_back(TextureCoordinate{
+      textureCoordinateList.emplace_back(
           std::stod(vertexString.at(1)),
           (vertexString.size() > 2) ? std::stod(vertexString.at(2)) : 0.,
-          (vertexString.size() > 3) ? std::stod(vertexString.at(3)) : 0.});
+          (vertexString.size() > 3) ? std::stod(vertexString.at(3)) : 0.);
     } else if (prefix == "f") {
       facesList.emplace_back(getVertexIdsFromLine(line));
     }
