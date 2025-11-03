@@ -3,13 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.15)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  #cmake_policy(SET CMP0141 NEW)
-  #set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
 
 project ("OBJParser")
+
+# Project-wide C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -19,10 +19,21 @@ find_package(Boost 1.63 REQUIRED COMPONENTS filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Add source to this project's executable.
-add_executable (OBJParser "OBJParser.cpp" "OBJParser.h")
-target_link_libraries(OBJParser Boost::filesystem)
+add_library(OBJParser_lib STATIC
+    "src/OBJParser.cpp"
+    "src/OBJParser.h"
+)
 
-set_property(TARGET OBJParser PROPERTY CXX_STANDARD 20)
+target_include_directories(OBJParser_lib
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(OBJParser_lib PUBLIC Boost::filesystem)
+
+# optional: small app that uses the library
+add_executable(OBJParser_exe src/main.cpp)
+target_link_libraries(OBJParser_exe PRIVATE OBJParser_lib)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(-Wall -Wextra -Wpedantic)
 elseif(MSVC)
@@ -42,7 +53,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	if(ENABLE_PROFILER STREQUAL "ON" AND MSVC)
 		add_definitions(/GH /Gh)
 		find_library(PROFILING_LIB micro-profiler_x64)
-		target_link_libraries(OBJParser ${PROFILING_LIB} )
+		target_link_libraries(OBJParser_exe ${PROFILING_LIB} )
 	endif()
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -55,9 +66,29 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWith
 	if(ENABLE_PROFILER STREQUAL "ON" AND MSVC)
 		add_definitions(/GH /Gh)
 		find_library(PROFILING_LIB micro-profiler_x64)
-		target_link_libraries(OBJParser ${PROFILING_LIB} )
+		target_link_libraries(OBJParser_exe ${PROFILING_LIB} )
 	endif()
 
 endif()
 
-# TODO: Add tests and install targets if needed.
+
+include(CTest)
+if (BUILD_TESTING)
+    # Use vcpkg-installed googletest (expects vcpkg toolchain to be used)
+    find_package(GTest CONFIG REQUIRED)
+
+    add_executable(OBJParser_tests
+        test/OBJParserTests.cpp
+    )
+
+    target_link_libraries(OBJParser_tests
+        PRIVATE
+            OBJParser_lib
+            GTest::gtest_main
+    )
+
+    target_include_directories(OBJParser_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_compile_features(OBJParser_tests PRIVATE cxx_std_20)
+
+    add_test(NAME OBJParserTests COMMAND OBJParser_tests)
+endif()

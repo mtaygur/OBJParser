@@ -237,19 +237,3 @@ std::unordered_map<size_t, std::vector<size_t>>& OBJParser::OBJData::calculateEd
 
   return faceIdxToAdjacentFacesIdxListMap;
 }
-
-int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    std::cout << "Usage: " << argv[0] << " <filename> \n" << std::flush;
-    return 1;
-  }
-  std::string filename = argv[1];
-
-  OBJParser::OBJData data(filename);
-  std::vector<OBJParser::LineSegment> lineSegmentsList =
-      data.calculateLineSegmentsList();
-  std::unordered_map<size_t, std::vector<size_t>>
-      faceIdxToAdjacentFacesIdxListMap = data.calculateEdgeNeighborhoodList();
-
-  return 0;
-}
