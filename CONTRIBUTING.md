@@ -1,11 +1,3 @@
-# Contributing to OBJParser
-
-Thank you for your interest in contributing to OBJParser! This document provides guidelines and instructions for contributing to the project.
-
-## Code of Conduct
-
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to keep our community welcoming and respectful.
-
 ## Ways to Contribute
 
 ### Reporting Bugs
@@ -22,7 +14,6 @@ If you find a bug, please create an issue with:
 Feature requests are welcome! Please include:
 - Clear description of the feature
 - Use cases and motivation
-- Example API design (if applicable)
 - Any implementation ideas you have
 
 ### Code Contributions
@@ -149,21 +140,10 @@ cmake --build build --target OBJParser_tests
 
 ## Pull Request Process
 
-1. **Update CHANGELOG.md** with your changes under "Unreleased"
-2. **Ensure CI passes** - all platforms must build successfully
-3. **Request review** from maintainers
-4. **Address feedback** promptly and professionally
-5. **Squash commits** if requested before merge
-
-### PR Title Format
-
-Use conventional commit style:
-- `feat: Add bounding box calculation`
-- `fix: Handle empty face lists correctly`
-- `docs: Update API reference for LineSegment`
-- `test: Add tests for edge cases in parser`
-- `refactor: Simplify face parsing logic`
-- `perf: Optimize edge adjacency calculation`
+1. **Update CHANGELOG.md**
+2. **Ensure CI passes**
+3. **Request review** 
+4. **Address feedback** 
 
 ### PR Description Template
 
@@ -192,12 +172,3 @@ How was this tested?
 ## License
 
 By contributing to OBJParser, you agree that your contributions will be licensed under the GNU General Public License v3.0.
-
-## Questions?
-
-Feel free to:
-- Open an issue for discussion
-- Reach out to maintainers
-- Check existing issues and PRs for similar topics
-
-Thank you for contributing to OBJParser! 🎉
